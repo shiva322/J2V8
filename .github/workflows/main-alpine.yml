@@ -1,0 +1,28 @@
+name: Build J2V8 Alpine
+
+on: [push]
+
+jobs:
+  generate_j2v8_archives:
+    name: Create J2V8 Linux-Alpine jar 
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Download monolithic libraries to v8.out directory and bundle Linux jar
+      run: |
+        curl -O https://download.eclipsesource.com/j2v8/v8/libv8_7.4.288_monolith.zip
+        mkdir -p v8.out
+        unzip libv8_7.4.288_monolith.zip -d v8.out
+
+        # start j2v8 build
+        python build.py -v alpine -t linux -a x64 --docker j2v8cmake j2v8jni j2v8cpp j2v8optimize j2v8java j2v8test
+  
+
+    - name: Archive J2V8 Linux x86_64 jar
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: j2v8-linux-alpine-x86_64
+        path: build.out/j2v8_linux_alpine_x86_64-6.0.0.jar
